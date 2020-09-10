@@ -31,11 +31,23 @@ elif args['Env'] == "sta":
 else:
     to = "fax@magicjackforbusiness.com"
 
+
+def get_domain(email):
+    str = email.split('@')
+    if "gmail" in str[1]:
+        return "smtp.gmail.com"
+    elif "corp" in str[1]:
+        return "smtp-mail.outlook.com"
+    elif "yahoo" in str[1]:
+        return "smtp.mail.yahoo.com"
+
+
 # instance of MIMEMultipart
 msg = MIMEMultipart()
 msg['From'] = args['Sender']  # senders email address
 msg['To'] = to  # receivers email address
 msg['Subject'] = args['subject']  # subject
+domain = get_domain(args['Sender'])
 body = "To:sta11\nCompany:uol\nRe:test\nMessage:\n//"  # the body of the mail
 msg.attach(MIMEText(body, 'plain'))  # attach body with the msg
 filename = args['attachment']  ## file to be sent
@@ -46,7 +58,8 @@ p.set_payload(attachment.read())  ## To change the payload into encoded form
 encoders.encode_base64(p)  ## encode into base64
 p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
 msg.attach(p)  # attach the instance 'p' to instance 'msg'
-s = smtplib.SMTP('smtp.gmail.com', 587)  ## creates SMTP session
+print("creating SMTP session to:",domain)
+s = smtplib.SMTP(domain, 587)  ## creates SMTP session
 s.starttls()  ## start TLS for security
 if s.login(args['Sender'], args['password']):  # login to email
     print("login success to:", args['Sender'])
@@ -58,6 +71,3 @@ for i in range(1, 2):
                                                                                      args['subject']))
     sleep(3)
 s.quit()  # terminating the session
-
-# case1: send fax to correct destination
-# send_fax("mjbhyd.dev@gmail.com", "Passw0rd1234", "fax_dev@magicjackforbusiness.com", "9999919066", "success fax case")
